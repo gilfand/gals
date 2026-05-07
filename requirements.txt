@@ -1,0 +1,7 @@
+nicegui>=2.0.0
+bcrypt
+pyyaml
+plotly
+pandas
+kaleido
+uvicorn

@@ -12,6 +12,6 @@ RUN mkdir -p /app/data
 
 RUN chmod -R 777 /app/data
 
-EXPOSE 8080
+EXPOSE 80
 
 CMD ["python", "main.py"]

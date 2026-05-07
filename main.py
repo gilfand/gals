@@ -54,7 +54,7 @@ if __name__ in {"__main__", "__mp_main__"}:
     IndustrialApp()
     ui.run(
         host="0.0.0.0",      # Обязательно для Runsite
-        port=8080,
+        port=80,
         reload=False,         # Отключаем в продакшене
         dark=True,
         title="Промышленная Платформа",

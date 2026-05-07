@@ -1,13 +1,11 @@
 from nicegui import ui, app
 from core.config import AppConfig
-from core.database import Database
 from plugins.dashboard.dashboard import DashboardPlugin
 from plugins.settings.settings import SettingsPlugin
 
 class IndustrialApp:
     def __init__(self):
         self.config = AppConfig()
-        self.db = Database()
         self.plugins = {}
         self.content_area = None
 

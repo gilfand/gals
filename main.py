@@ -1,77 +1,52 @@
-from nicegui import ui, app
-from core.config import AppConfig
-from core.plugin import Plugin
-from plugins.dashboard.dashboard import DashboardPlugin
-from plugins.settings.settings import SettingsPlugin
-from core.auth import Auth
-
+# main.py
 import os
-from core.database import Database
+import sys
+from nicegui import ui
 
-class IndustrialApp:
-    def __init__(self):
-        db_url = os.getenv("DATABASE_URL")
-        if not db_url:
-            raise ValueError("DATABASE_URL is not set!")
+print("=== Industrial Platform Starting ===")
+print(f"DATABASE_URL: {'SET' if os.getenv('DATABASE_URL') else 'NOT SET'}")
 
-        print("Connecting to PostgreSQL...")
-        self.db = Database(db_url)
-        print("Database connected successfully.")
+try:
+    from core.config import AppConfig
+    from core.database import Database
+    from core.auth import Auth
+    from core.plugin import Plugin
 
-        self.auth = Auth()
-        self.config = AppConfig()
-        self.plugins: dict[str, Plugin] = {}
-        self.content_area = None
+    from plugins.dashboard.dashboard import DashboardPlugin
+    from plugins.settings.settings import SettingsPlugin
 
-        self.register_plugins()
-        self.setup_ui()
+    class IndustrialApp:
+        def __init__(self):
+            db_url = os.getenv("DATABASE_URL")
+            if not db_url:
+                raise ValueError("DATABASE_URL environment variable is not set!")
 
-    def register_plugins(self):
-        self.plugins = {
-            "dashboard": DashboardPlugin(),
-            "settings": SettingsPlugin(),
-        }
+            print("Connecting to PostgreSQL...")
+            self.db = Database(db_url)
+            print("Database connection successful.")
 
-    def setup_ui(self):
-        ui.colors(primary='#00C853', secondary='#1EB980')
+            self.auth = Auth()
+            self.config = AppConfig()
+            self.plugins = {}
+            self.content_area = None
 
-        with ui.header().classes("items-center justify-between px-4 py-2 bg-[#1E2A24]"):
-            ui.label("Промышленная Платформа").classes("text-h6 font-bold")
-            ui.button(icon="logout", on_click=self.logout).props("flat")
+            self.register_plugins()
+            self.setup_ui()
 
-        with ui.left_drawer(value=True).classes("bg-[#0F1A14]") as self.drawer:
-            self.build_sidebar()
+        # ... (весь остальной код класса IndustrialApp)
 
-        self.content_area = ui.column().classes("w-full p-6 gap-6")
+    if __name__ in {"__main__", "__mp_main__"}:
+        IndustrialApp()
+        ui.run(
+            host="0.0.0.0",
+            port=80,
+            reload=False,
+            dark=True,
+            title="Промышленная Платформа"
+        )
 
-        # Автозагрузка дашборда
-        ui.timer(0.2, lambda: self.show_plugin("dashboard"), once=True)
-
-    def build_sidebar(self):
-        with ui.column().classes("w-full p-2 gap-1"):
-            for key, plugin in self.plugins.items():
-                ui.button(
-                    plugin.title,
-                    icon=plugin.icon,
-                    on_click=lambda _, k=key: self.show_plugin(k)
-                ).props("flat align=left").classes("w-full")
-
-    def show_plugin(self, name: str):
-        self.content_area.clear()
-        with self.content_area:
-            self.plugins[name].build()
-
-    def logout(self):
-        ui.notify("Вы вышли из системы", type="info")
-
-if __name__ in {"__main__", "__mp_main__"}:
-    try:
-        print("=== IndustrialApp starting ===")
-        app_instance = IndustrialApp()
-        print("=== NiceGUI starting on port 80 ===")
-        ui.run(host="0.0.0.0", port=80, reload=False, dark=True)
-
-    except Exception as e:
-        print(f"CRITICAL ERROR: {e}")
-        import traceback
-        traceback.print_exc()
+except Exception as e:
+    print(f"CRITICAL STARTUP ERROR: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)

@@ -1,21 +1,27 @@
 from nicegui import ui, app
 from core.config import AppConfig
+from core.plugin import Plugin
 from plugins.dashboard.dashboard import DashboardPlugin
 from plugins.settings.settings import SettingsPlugin
 from core.auth import Auth
 
 import os
+import sys
 from core.database import Database
 
 class IndustrialApp:
     def __init__(self):
         db_url = os.getenv("DATABASE_URL")
+        if not db_url:
+            raise ValueError("DATABASE_URL is not set!")
 
-        self.db = Database(db_url=db_url) 
+        print("Connecting to PostgreSQL...")
+        self.db = Database(db_url)
+        print("Database connected successfully.")
+
         self.auth = Auth()
-
         self.config = AppConfig()
-        self.plugins = {}
+        self.plugins: dict[str, Plugin] = {}
         self.content_area = None
 
         self.register_plugins()
@@ -60,13 +66,18 @@ class IndustrialApp:
         ui.notify("Вы вышли из системы", type="info")
 
 if __name__ in {"__main__", "__mp_main__"}:
-    print("DATABASE_URL:", os.getenv("DATABASE_URL"))
-    IndustrialApp()
-    ui.run(
-        host="0.0.0.0",
-        port=80,
-        reload=False,
-        dark=True,
-        title="Промышленная Платформа",
-        favicon="🚀"
-    )
+    try:
+        print("DATABASE_URL:", os.getenv("DATABASE_URL"))
+        IndustrialApp()
+        ui.run(
+            host="0.0.0.0",
+            port=80,
+            reload=False,
+            dark=True,
+            title="Промышленная Платформа"
+        )
+    except Exception as e:
+        print(f"CRITICAL ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)

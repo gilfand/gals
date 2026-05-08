@@ -11,5 +11,4 @@ RUN mkdir -p /app/data /app/migrations/versions && chmod -R 777 /app/data
 
 EXPOSE 80
 
-# Запуск миграций + приложение
-CMD ["sh", "-c", "alembic upgrade head && python main.py"]
+CMD ["sh", "-c", "echo '=== Starting migrations ===' && alembic upgrade head && echo '=== Migrations completed ===' && echo '=== Starting NiceGUI ===' && python main.py"]

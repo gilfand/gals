@@ -13,7 +13,7 @@ EXPOSE 80
 
 CMD ["sh", "-c", "\
     echo '=== Starting Alembic migrations ===' && \
-    alembic upgrade heads && \
+    alembic upgrade head && \
     echo '=== Migrations completed successfully ===' && \
     echo '=== Starting NiceGUI application ===' && \
     python main.py \

@@ -6,7 +6,6 @@ from plugins.settings.settings import SettingsPlugin
 from core.auth import Auth
 
 import os
-import sys
 from core.database import Database
 
 class IndustrialApp:
@@ -67,17 +66,12 @@ class IndustrialApp:
 
 if __name__ in {"__main__", "__mp_main__"}:
     try:
-        print("DATABASE_URL:", os.getenv("DATABASE_URL"))
-        IndustrialApp()
-        ui.run(
-            host="0.0.0.0",
-            port=80,
-            reload=False,
-            dark=True,
-            title="Промышленная Платформа"
-        )
+        print("=== IndustrialApp starting ===")
+        app_instance = IndustrialApp()
+        print("=== NiceGUI starting on port 80 ===")
+        ui.run(host="0.0.0.0", port=80, reload=False, dark=True)
+
     except Exception as e:
         print(f"CRITICAL ERROR: {e}")
         import traceback
         traceback.print_exc()
-        sys.exit(1)

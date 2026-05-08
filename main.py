@@ -2,9 +2,18 @@ from nicegui import ui, app
 from core.config import AppConfig
 from plugins.dashboard.dashboard import DashboardPlugin
 from plugins.settings.settings import SettingsPlugin
+from core.auth import Auth
+
+import os
+from core.database import Database
 
 class IndustrialApp:
     def __init__(self):
+        db_url = os.getenv("DATABASE_URL")
+
+        self.db = Database(db_url=db_url) 
+        self.auth = Auth()
+
         self.config = AppConfig()
         self.plugins = {}
         self.content_area = None
@@ -51,11 +60,12 @@ class IndustrialApp:
         ui.notify("Вы вышли из системы", type="info")
 
 if __name__ in {"__main__", "__mp_main__"}:
+    print("DATABASE_URL:", os.getenv("DATABASE_URL"))
     IndustrialApp()
     ui.run(
-        host="0.0.0.0",      # Обязательно для Runsite
+        host="0.0.0.0",
         port=80,
-        reload=False,         # Отключаем в продакшене
+        reload=False,
         dark=True,
         title="Промышленная Платформа",
         favicon="🚀"

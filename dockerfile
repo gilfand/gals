@@ -1,4 +1,3 @@
-# Dockerfile
 FROM zauberzeug/nicegui:latest
 
 WORKDIR /app
@@ -8,10 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /app/data
-
-RUN chmod -R 777 /app/data
+RUN mkdir -p /app/data /app/migrations/versions && chmod -R 777 /app/data
 
 EXPOSE 80
 
-CMD ["python", "main.py"]
+# Запуск миграций + приложение
+CMD ["sh", "-c", "alembic upgrade head && python main.py"]

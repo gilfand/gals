@@ -1,37 +1,38 @@
 # main.py
 import os
-import sys
+#from dotenv import load_dotenv
 from nicegui import ui
 
-print("=== Industrial Platform Starting ===")
-print(f"DATABASE_URL: {'SET' if os.getenv('DATABASE_URL') else 'NOT SET'}")
+#load_dotenv()
 
-try:
-    from core.config import AppConfig
-    from core.database import Database
-    from core.auth import Auth
-    from core.plugin import Plugin
+print("=== Industrial Platform Starting (Local) ===")
 
-    from plugins.dashboard.dashboard import DashboardPlugin
-    from plugins.settings.settings import SettingsPlugin
+from core.config import AppConfig
+from core.database import Database
+from core.auth import Auth
+from core.plugin import Plugin
 
-    class IndustrialApp:
-        def __init__(self):
-            db_url = os.getenv("DATABASE_URL")
-            if not db_url:
-                raise ValueError("DATABASE_URL environment variable is not set!")
+from plugins.dashboard.dashboard import DashboardPlugin
+from plugins.settings.settings import SettingsPlugin
 
-            print("Connecting to PostgreSQL...")
-            self.db = Database(db_url)
-            print("Database connection successful.")
 
-            self.auth = Auth()
-            self.config = AppConfig()
-            self.plugins = {}
-            self.content_area = None
+class IndustrialApp:
+    def __init__(self):
+        db_url = os.getenv("DATABASE_URL")
+        if not db_url:
+            raise ValueError("DATABASE_URL не найден в .env файле!")
 
-            self.register_plugins()
-            self.setup_ui()
+        print("Подключение к PostgreSQL...")
+        self.db = Database(db_url)
+        print("✅ База данных подключена")
+
+        self.auth = Auth()
+        self.config = AppConfig()
+        self.plugins: dict[str, Plugin] = {}
+        self.main_content = None
+
+        self.register_plugins()
+        self.create_routes()
 
     def register_plugins(self):
         self.plugins = {
@@ -39,47 +40,53 @@ try:
             "settings": SettingsPlugin(),
         }
 
-    def setup_ui(self):
-        ui.colors(primary='#00C853', secondary='#1EB980')
-
-        if not self.auth.is_authenticated():
+    def create_routes(self):
+        @ui.page('/login')
+        def login_page():
             self.show_login_page()
-        else:
+
+        @ui.page('/')
+        def main_page():
+            if not self.auth.is_authenticated():
+                ui.navigate.to('/login')
+                return
             self.show_main_app()
 
     def show_login_page(self):
-        with ui.page('/login'):
-            with ui.card().classes("absolute-center w-full max-w-md p-8 bg-[#1E2A24]"):
-                ui.label("Вход в систему").classes("text-2xl font-bold text-center mb-6 text-white")
+        """Страница логина"""
+        with ui.column().classes("absolute-center items-center gap-8 w-full max-w-md"):
+            ui.label("Промышленная Платформа").classes("text-4xl font-bold text-[#00C853]")
+            ui.label("Вход в систему").classes("text-2xl")
 
-                username = ui.input("Имя пользователя").classes("w-full")
-                password = ui.input("Пароль", password=True).classes("w-full")
+            with ui.card().classes("w-full p-8 bg-[#1E2A24]"):
+                username = ui.input("Имя пользователя").classes("w-full mb-4")
+                password = ui.input("Пароль", password=True).classes("w-full mb-6")
 
                 def try_login():
                     user = self.db.login(username.value, password.value)
                     if user:
                         self.auth.login(user)
+                        ui.notify("Успешный вход!", type="positive")
                         ui.navigate.to('/')
                     else:
                         ui.notify("Неверный логин или пароль", type="negative")
 
-                ui.button("Войти", on_click=try_login).classes("w-full mt-6")
-                ui.button("Регистрация", on_click=lambda: ui.notify("Регистрация в разработке")).classes("w-full mt-2")
+                ui.button("Войти", on_click=try_login).classes("w-full py-3")
 
     def show_main_app(self):
+        """Главное приложение"""
         with ui.header().classes("items-center justify-between px-4 py-2 bg-[#1E2A24]"):
             ui.label("Промышленная Платформа").classes("text-h6 font-bold")
             with ui.row():
                 ui.label(f"{self.auth.current_user} ({self.auth.current_role})").classes("text-sm")
                 ui.button(icon="logout", on_click=self.logout).props("flat")
 
-        with ui.left_drawer(value=True).classes("bg-[#0F1A14] text-white") as self.drawer:
+        with ui.left_drawer(value=True, fixed=False).classes("bg-[#0F1A14] text-white"):
             self.build_sidebar()
 
-        self.content_area = ui.column().classes("w-full p-6 gap-6")
-
-        # Открываем дашборд по умолчанию
-        ui.timer(0.1, lambda: self.show_plugin("dashboard"), once=True)
+        # Основной контейнер контента
+        self.main_content = ui.column().classes("w-full p-6 gap-6")
+        self.show_plugin("dashboard")
 
     def build_sidebar(self):
         with ui.column().classes("w-full p-2 gap-1"):
@@ -97,26 +104,28 @@ try:
             ui.notify("Доступ запрещён", type="negative")
             return
 
-        self.content_area.clear()
-        with self.content_area:
-            plugin.build()
+        if self.main_content:
+            self.main_content.clear()
+            with self.main_content:
+                plugin.build()
 
     def logout(self):
         self.auth.logout()
         ui.navigate.to('/login')
 
-    if __name__ in {"__main__", "__mp_main__"}:
+
+# ====================== ЗАПУСК ======================
+if __name__ in {"__main__", "__mp_main__"}:
+    try:
         IndustrialApp()
         ui.run(
-            host="0.0.0.0",
-            port=80,
-            reload=False,
+            host="127.0.0.1",
+            port=8080,
+            reload=True,
             dark=True,
             title="Промышленная Платформа"
         )
-
-except Exception as e:
-    print(f"CRITICAL STARTUP ERROR: {e}")
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
+    except Exception as e:
+        print(f"❌ CRITICAL ERROR: {e}")
+        import traceback
+        traceback.print_exc()

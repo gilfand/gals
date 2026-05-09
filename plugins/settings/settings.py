@@ -5,6 +5,7 @@ class SettingsPlugin(Plugin):
     name = "settings"
     title = "Настройки"
     icon = "settings"
+    allowed_roles = "admin"
 
     def build(self):
         ui.label("Настройки приложения").classes("text-3xl font-bold text-[#00C853]")

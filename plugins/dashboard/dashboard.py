@@ -6,6 +6,7 @@ from core.plugin import Plugin
 from core.ui_components import kpi_card
 
 class DashboardPlugin(Plugin):
+    allowed_roles = "viewer"
     name = "dashboard"
     title = "Дашборд"
     icon = "dashboard"

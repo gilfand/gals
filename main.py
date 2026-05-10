@@ -2,8 +2,8 @@
 import os
 from nicegui import ui
 
-from dotenv import load_dotenv
-load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 
 print("=== Industrial Platform Starting (Local) ===")
 

@@ -5,8 +5,8 @@ from logging.config import fileConfig
 from sqlalchemy import pool, create_engine
 from alembic import context
 
-from dotenv import load_dotenv
-load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 
 # Добавляем путь к проекту
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -19,7 +19,6 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
-
 
 def get_url():
     """Получаем DATABASE_URL из переменной окружения"""

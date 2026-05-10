@@ -5,6 +5,9 @@ from logging.config import fileConfig
 from sqlalchemy import pool, create_engine
 from alembic import context
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Добавляем путь к проекту
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 

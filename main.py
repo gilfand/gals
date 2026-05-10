@@ -1,9 +1,9 @@
 # main.py
 import os
-#from dotenv import load_dotenv
 from nicegui import ui
 
-#load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 print("=== Industrial Platform Starting (Local) ===")
 

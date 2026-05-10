@@ -1,4 +1,5 @@
 # Dockerfile
+# Force rebuild 2026-05-11
 FROM zauberzeug/nicegui:latest
 
 WORKDIR /app

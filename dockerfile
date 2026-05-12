@@ -17,4 +17,5 @@ RUN mkdir -p /app/data /app/migrations/versions && \
 
 EXPOSE 80
 # alembic upgrade head
-CMD ["python", "main.py"]
+# CMD ["python", "main.py"]
+CMD ["sh", "-c", "python main.py"]

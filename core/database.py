@@ -1,65 +1,72 @@
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import QueuePool
+# core/database.py
+import psycopg2
 import bcrypt
-from core.models import Base
+from psycopg2.extras import RealDictCursor
 from typing import Optional, Dict
 
 class Database:
     def __init__(self, db_url: str):
-        self.engine = create_engine(
-            db_url,
-            poolclass=QueuePool,
-            pool_size=15,
-            max_overflow=25,
-            pool_timeout=30,
-        )
-        self.Session = sessionmaker(bind=self.engine)
+        self.db_url = db_url
+        self.conn = None
         self.create_tables()
 
-    def create_tables(self):
-        Base.metadata.create_all(self.engine)
-    
-    def login(self, username: str, password: str) -> Optional[Dict]:
-        """Авторизация"""
-        session = self.Session()
-        try:
-            result = session.execute(text(
-                "SELECT username, role, password FROM users WHERE username = :username"
-            ), {"username": username})
-            row = result.fetchone()
+    def get_connection(self):
+        if not self.conn or self.conn.closed:
+            self.conn = psycopg2.connect(self.db_url, cursor_factory=RealDictCursor)
+        return self.conn
 
-            if row and bcrypt.checkpw(password.encode(), row.password.encode()):
-                return {"username": row.username, "role": row.role}
-            return None
-        finally:
-            session.close()
+    def create_tables(self):
+        """Создаём таблицу users"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(50) UNIQUE NOT NULL,
+                        password TEXT NOT NULL,
+                        role VARCHAR(20) DEFAULT 'viewer',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                conn.commit()
+
+        self._create_default_admin()
+
+    def _create_default_admin(self):
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT username FROM users WHERE username = 'admin'")
+                if not cur.fetchone():
+                    hashed = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt())
+                    cur.execute(
+                        "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
+                        ("admin", hashed.decode(), "admin")
+                    )
+                    conn.commit()
+
+    def login(self, username: str, password: str) -> Optional[Dict]:
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT username, role, password FROM users WHERE username = %s", (username,))
+                user = cur.fetchone()
+                if user and bcrypt.checkpw(password.encode(), user['password'].encode()):
+                    return {"username": user['username'], "role": user['role']}
+        return None
 
     def register(self, username: str, password: str, role: str = "viewer") -> bool:
-        """Регистрация нового пользователя"""
-        session = self.Session()
         try:
             hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
-            session.execute(text(
-                "INSERT INTO users (username, password, role) VALUES (:username, :password, :role)"
-            ), {"username": username, "password": hashed.decode(), "role": role})
-            session.commit()
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
+                        (username, hashed.decode(), role)
+                    )
+                    conn.commit()
             return True
         except Exception:
             return False
-        finally:
-            session.close()
-
-    def get_user_role(self, username: str) -> str:
-        session = self.Session()
-        try:
-            result = session.execute(text(
-                "SELECT role FROM users WHERE username = :username"
-            ), {"username": username})
-            row = result.fetchone()
-            return row.role if row else "viewer"
-        finally:
-            session.close()
 
     def close(self):
-        self.engine.dispose()    
+        if self.conn and not self.conn.closed:
+            self.conn.close()

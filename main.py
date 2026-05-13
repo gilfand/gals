@@ -19,7 +19,7 @@ class IndustrialApp:
         if not db_url:
             raise ValueError("DATABASE_URL не найден!")
 
-        print("Подключение к PostgreSQL...")
+        print(db_url)
         self.db = Database(db_url)
         print("✅ База данных подключена")
 

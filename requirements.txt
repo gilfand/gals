@@ -1,5 +1,5 @@
 nicegui>=2.0.0
-bcrypt
+bcrypt>=4.1.0
 pyyaml
 plotly
 pandas

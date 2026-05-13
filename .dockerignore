@@ -4,4 +4,8 @@ __pycache__
 .gitignore
 .vscode
 .venv
+.env
+.env.local
+.env.production
+.env.development
 migrations/versions/__pycache__

@@ -1,10 +1,5 @@
 nicegui>=2.0.0
-bcrypt
+bcrypt>=4.1.0
 pyyaml
-plotly
-pandas
-kaleido
-sqlalchemy
-psycopg2-binary
-alembic
 python-dotenv
+psycopg2-binary

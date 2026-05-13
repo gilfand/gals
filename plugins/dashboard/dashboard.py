@@ -1,34 +1,46 @@
-
+# plugins/dashboard/dashboard.py
 from nicegui import ui
-import plotly.express as px
-import pandas as pd
 from core.plugin import Plugin
-from core.ui_components import kpi_card
 
 class DashboardPlugin(Plugin):
-    allowed_roles = "viewer"
     name = "dashboard"
     title = "Дашборд"
     icon = "dashboard"
+    allowed_roles = ["viewer", "operator", "admin"]
 
     def build(self):
-        ui.label("Производственный Дашборд").classes("text-3xl font-bold text-[#00C853]")
+        # Заголовок
+        ui.label("Производственный Дашборд").classes("text-3xl font-bold text-[#00C853] mb-6")
 
+        # KPI Карточки (4 штуки)
         with ui.row().classes("w-full gap-4"):
-            kpi_card("Общая выработка", "12 450", "т/сут")
-            kpi_card("Эффективность", "94.8", "%", "#1EB980")
-            kpi_card("Температура", "68.4", "°C", "#4ADE80")
-            kpi_card("Коэффициент OEE", "87.3", "%")
+            self.kpi_card("Общая выработка", "12 450", "т/сут", "trending_up", "#00C853")
+            self.kpi_card("Эффективность", "94.8", "%", "speed", "#1EB980")
+            self.kpi_card("Температура", "68.4", "°C", "thermostat", "#4ADE80")
+            self.kpi_card("Время работы", "98.2", "%", "schedule", "#00C853")
 
-        # Plotly График
-        df = pd.DataFrame({
-            "Время": ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"],
-            "Факт": [8200, 9400, 11800, 13200, 10900, 8500],
-            "План": [8000, 9000, 11000, 12500, 10500, 9000]
-        })
+        # Простая информация
+        with ui.card().classes("w-full p-6 mt-6 bg-[#1E2A24]"):
+            ui.label("Статус производства").classes("text-xl font-bold mb-4")
+            with ui.row().classes("gap-8"):
+                ui.label("✅ Линия №1: Работает").classes("text-green-400")
+                ui.label("✅ Линия №2: Работает").classes("text-green-400")
+                ui.label("⏸️  Линия №3: Остановлена").classes("text-orange-400")
 
-        fig = px.line(df, x="Время", y=["Факт", "План"], markers=True,
-                      title="Выработка за сутки")
-        fig.update_layout(template="plotly_dark", height=450)
+        # Последние обновления
+        with ui.card().classes("w-full p-6 mt-4 bg-[#1E2A24]"):
+            ui.label("Последние события").classes("text-lg font-bold mb-3")
+            with ui.column().classes("gap-2"):
+                ui.label("• 14:32 — Выработка за час: 1240 т").classes("text-sm")
+                ui.label("• 14:15 — Температура в норме").classes("text-sm")
+                ui.label("• 13:58 — Завершена смена А").classes("text-sm")
 
-        ui.plotly(fig).classes("w-full")
+    def kpi_card(self, title: str, value: str, unit: str, icon: str, color: str = "#00C853"):
+        with ui.card().classes("flex-1 p-5 bg-[#1E2A24] hover:bg-[#2A3A34] transition-colors"):
+            with ui.row().classes("items-center gap-3"):
+                ui.icon(icon, color=color).classes("text-3xl")
+                with ui.column().classes("gap-1"):
+                    ui.label(title).classes("text-sm text-gray-400")
+                    with ui.row().classes("items-baseline gap-1"):
+                        ui.label(value).classes(f"text-3xl font-bold text-{color.replace('#', '')}")
+                        ui.label(unit).classes("text-gray-400 text-sm")

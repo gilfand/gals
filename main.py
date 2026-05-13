@@ -2,10 +2,7 @@
 import os
 from nicegui import ui
 
-from dotenv import load_dotenv
-load_dotenv()
-
-print("=== Industrial Platform Starting (Local) ===")
+print("=== Industrial Platform Starting ===")
 
 from core.config import AppConfig
 from core.database import Database
@@ -15,13 +12,17 @@ from core.plugin import Plugin
 from plugins.dashboard.dashboard import DashboardPlugin
 from plugins.settings.settings import SettingsPlugin
 
+
 class IndustrialApp:
     def __init__(self):
         db_url = os.getenv("DATABASE_URL")
         if not db_url:
             raise ValueError("DATABASE_URL не найден!")
 
+        print("Подключение к PostgreSQL...")
         self.db = Database(db_url)
+        print("✅ База данных подключена")
+
         self.auth = Auth()
         self.config = AppConfig()
         self.plugins: dict[str, Plugin] = {}
@@ -46,13 +47,11 @@ class IndustrialApp:
 
         @ui.page('/')
         def main_page():
-            print(f"Checking auth: {self.auth.is_authenticated()}")
             if not self.auth.is_authenticated():
                 ui.navigate.to('/login')
                 return
             self.show_main_app()
 
-    # ===================== ЛОГИН =====================
     def show_login_page(self):
         with ui.column().classes("absolute-center items-center gap-6 w-full max-w-md"):
             ui.label("Промышленная Платформа").classes("text-4xl font-bold text-[#00C853]")
@@ -63,15 +62,12 @@ class IndustrialApp:
                 password = ui.input("Пароль", password=True).classes("w-full mb-6")
 
                 def try_login():
-                    print(f"Attempt login: {username.value}")
-                    user = self.db.login(username.value, password.value)
+                    user = self.db.login(username.value.strip(), password.value)
                     if user:
-                        print(f"Login successful: {user}")
                         self.auth.login(user)
                         ui.notify("Успешный вход!", type="positive")
-                        ui.navigate.to('/')          # Переход на главную
+                        ui.navigate.to('/')
                     else:
-                        print("Login failed")
                         ui.notify("Неверный логин или пароль", type="negative")
 
                 ui.button("Войти", on_click=try_login).classes("w-full py-3")
@@ -80,7 +76,6 @@ class IndustrialApp:
                          on_click=lambda: ui.navigate.to('/register')
                 ).props("flat").classes("w-full mt-2 text-[#00C853]")
 
-    # ===================== РЕГИСТРАЦИЯ =====================
     def show_register_page(self):
         with ui.column().classes("absolute-center items-center gap-6 w-full max-w-md"):
             ui.label("Регистрация").classes("text-3xl font-bold")
@@ -94,7 +89,7 @@ class IndustrialApp:
                     if password.value != password2.value:
                         ui.notify("Пароли не совпадают", type="negative")
                         return
-                    success = self.db.register(username.value, password.value, role="viewer")
+                    success = self.db.register(username.value.strip(), password.value)
                     if success:
                         ui.notify("Регистрация успешна!", type="positive")
                         ui.navigate.to('/login')
@@ -102,12 +97,8 @@ class IndustrialApp:
                         ui.notify("Пользователь уже существует", type="negative")
 
                 ui.button("Зарегистрироваться", on_click=try_register).classes("w-full py-3")
+                ui.button("Уже есть аккаунт? Войти", on_click=lambda: ui.navigate.to('/login')).props("flat").classes("w-full")
 
-                ui.button("Уже есть аккаунт? Войти", 
-                         on_click=lambda: ui.navigate.to('/login')
-                ).props("flat").classes("w-full")
-
-    # ===================== ГЛАВНОЕ ПРИЛОЖЕНИЕ =====================
     def show_main_app(self):
         with ui.header().classes("items-center justify-between px-4 py-2 bg-[#1E2A24]"):
             ui.label("Промышленная Платформа").classes("text-h6 font-bold")
@@ -137,7 +128,7 @@ class IndustrialApp:
             ui.notify("Доступ запрещён", type="negative")
             return
 
-        if hasattr(self, 'main_content') and self.main_content:
+        if self.main_content:
             self.main_content.clear()
             with self.main_content:
                 plugin.build()

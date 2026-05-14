@@ -140,7 +140,6 @@ class IndustrialApp:
 
 fastapi_app = FastAPI(title="Industrial Platform API")
 fastapi_app.include_router(users_router)
-ui.mount("/api", fastapi_app)
 
 if __name__ in {"__main__", "__mp_main__"}:
     try:
@@ -150,7 +149,8 @@ if __name__ in {"__main__", "__mp_main__"}:
             port=80,
             reload=False,
             dark=True,
-            title="Промышленная Платформа"
+            title="Промышленная Платформа",
+            fastapi=fastapi_app
         )
     except Exception as e:
         print(f"❌ CRITICAL ERROR: {e}")

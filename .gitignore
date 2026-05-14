@@ -27,4 +27,4 @@ MANIFEST
 venv/
 env/
 ENV/
-.env/
+.env

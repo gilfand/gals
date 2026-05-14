@@ -1,6 +1,8 @@
 # main.py
 import os
 from nicegui import ui
+from fastapi import FastAPI
+from api.users import router as users_router
 
 print("=== Industrial Platform Starting ===")
 
@@ -11,7 +13,6 @@ from core.plugin import Plugin
 
 from plugins.dashboard.dashboard import DashboardPlugin
 from plugins.settings.settings import SettingsPlugin
-
 
 class IndustrialApp:
     def __init__(self):
@@ -137,6 +138,9 @@ class IndustrialApp:
         self.auth.logout()
         ui.navigate.to('/login')
 
+fastapi_app = FastAPI(title="Industrial Platform API")
+fastapi_app.include_router(users_router)
+ui.mount("/api", fastapi_app)
 
 if __name__ in {"__main__", "__mp_main__"}:
     try:

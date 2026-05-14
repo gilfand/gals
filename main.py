@@ -1,24 +1,6 @@
 # main.py
 import os
 from nicegui import ui
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-# ====================== FASTAPI ======================
-# CORS (чтобы можно было обращаться из браузера)
-fastapi_app = FastAPI(title="Industrial Platform API")
-fastapi_app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-from api.users import router as users_router
-fastapi_app.include_router(users_router)
-
-print("=== Industrial Platform Starting ===")
 
 from core.config import AppConfig
 from core.database import Database
@@ -27,6 +9,8 @@ from core.plugin import Plugin
 
 from plugins.dashboard.dashboard import DashboardPlugin
 from plugins.settings.settings import SettingsPlugin
+
+print("=== Industrial Platform Starting ===")
 
 class IndustrialApp:
     def __init__(self):
@@ -151,7 +135,6 @@ class IndustrialApp:
     def logout(self):
         self.auth.logout()
         ui.navigate.to('/login')
-
 
 if __name__ in {"__main__", "__mp_main__"}:
     try:

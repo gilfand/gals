@@ -3,8 +3,7 @@ import os
 import signal
 import sys
 
-from nicegui import ui, app
-from fastapi.responses import JSONResponse
+from nicegui import ui
 
 from core.config import AppConfig
 from core.database import Database
@@ -144,10 +143,6 @@ def shutdown(*args):
     sys.exit(0)
 
 signal.signal(signal.SIGTERM, shutdown) 
-
-@app.get('/healthz')
-async def healthz():
-    return JSONResponse({'status': 'ok'})
 
 if __name__ in {"__main__", "__mp_main__"}:
     try:

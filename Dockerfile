@@ -8,8 +8,8 @@ RUN python -m pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /app/data && chmod -R 777 /app/data
+RUN mkdir -p /app/data
 
-EXPOSE 80
+EXPOSE 8080
 
-CMD ["python", "main.py"]
+CMD ["python", "-u", "main.py"]

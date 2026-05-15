@@ -1,5 +1,8 @@
 # main.py
 import os
+import signal
+import sys
+
 from nicegui import ui
 
 from core.config import AppConfig
@@ -136,12 +139,19 @@ class IndustrialApp:
         self.auth.logout()
         ui.navigate.to('/login')
 
+def shutdown(*args):
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, shutdown) 
+
 if __name__ in {"__main__", "__mp_main__"}:
     try:
         IndustrialApp()
+        print("RUNNING UI")
+
         ui.run(
             host="0.0.0.0",
-            port=80,
+            port=8080,
             reload=False,
             dark=True,
             title="Промышленная Платформа"

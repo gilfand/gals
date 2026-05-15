@@ -12,4 +12,4 @@ RUN mkdir -p /app/data
 
 EXPOSE 8080
 
-CMD ["python", "-u", "main.py"]
+CMD ["python", "main.py"]

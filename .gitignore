@@ -21,6 +21,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+Makefile
+docker-compose.yml
 
 # Virtual Environment
 .venv/

@@ -4,17 +4,17 @@ from core.plugin import Plugin
 
 class DashboardPlugin(Plugin):
     name = "dashboard"
-    title = "Дашборд"
+    title = "Dashboard"
     icon = "dashboard"
     allowed_roles = ["viewer", "operator", "admin"]
 
     def build(self):
         # Заголовок
-        ui.label("Производственный Дашборд").classes("text-3xl font-bold text-[#00C853] mb-6")
+        ui.label("Dashboard").classes("text-3xl font-bold text-[#00C853] mb-6")
 
         # KPI Карточки (4 штуки)
         with ui.row().classes("w-full gap-4"):
-            self.kpi_card("Общая выработка", "12 450", "т/сут", "trending_up", "#00C853")
+            self.kpi_card("Total Output", "12 450", "т/сут", "trending_up", "#00C853")
             self.kpi_card("Эффективность", "94.8", "%", "speed", "#1EB980")
             self.kpi_card("Температура", "68.4", "°C", "thermostat", "#4ADE80")
             self.kpi_card("Время работы", "98.2", "%", "schedule", "#00C853")

@@ -1,13 +1,33 @@
-version: '3.8'
-
 services:
+  postgres:
+    image: postgres:16
+    container_name: industrial-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: industrial_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   app:
     build: .
-    restart: always
+    container_name: industrial-app
+    restart: unless-stopped
     ports:
-      - "80:80"
+      - "8080:8080"
+    env_file:
+      - .env
     volumes:
-      - ./config.yaml:/app/config.yaml
-      - ./data:/app/data
+      - .:/GALS  
+      - ./data:/GALS/data
+    depends_on:
+      - postgres
     environment:
-      - TZ=Europe/Berlin
+      - ENV=development
+    command: python -u main.py
+
+volumes:
+  postgres_data:

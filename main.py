@@ -56,7 +56,7 @@ class IndustrialApp:
 
     def show_login_page(self):
         with ui.column().classes("absolute-center items-center gap-6 w-full max-w-md"):
-            ui.label("Промышленная Платформа").classes("text-4xl font-bold text-[#00C853]")
+            ui.label("Платформа").classes("text-4xl font-bold text-[#00C853]")
             ui.label("Вход в систему").classes("text-2xl")
 
             with ui.card().classes("w-full p-8 bg-[#1E2A24]"):
@@ -152,9 +152,9 @@ if __name__ in {"__main__", "__mp_main__"}:
         ui.run(
             host="0.0.0.0",
             port=8080,
-            reload=False,
+            reload=True,
             dark=True,
-            title="Промышленная Платформа"
+            title="Платформа"
         )
     except Exception as e:
         print(f"❌ CRITICAL ERROR: {e}")

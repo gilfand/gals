@@ -114,6 +114,14 @@ class IndustrialApp:
         self.main_content = ui.column().classes("w-full p-6 gap-6")
         self.show_plugin("dashboard")
 
+        ui.timer(60, self.check_session_timeout)
+
+    def check_session_timeout(self):
+        """Проверяем таймаут сессии"""
+        if not self.auth.is_authenticated():
+            ui.notify("Сессия истекла по таймауту", type="warning")
+            ui.navigate.to('/login')
+
     def build_sidebar(self):
         with ui.column().classes("w-full p-2 gap-1"):
             for key, plugin in self.plugins.items():
@@ -135,9 +143,9 @@ class IndustrialApp:
             with self.main_content:
                 plugin.build()
 
-def logout(self):
-        self.auth.logout()
-        ui.navigate.to('/login')
+    def logout(self):
+            self.auth.logout()
+            ui.navigate.to('/login')
 
 def shutdown(*args):
     sys.exit(0)
@@ -154,7 +162,8 @@ if __name__ in {"__main__", "__mp_main__"}:
             port=8080,
             reload=True,
             dark=True,
-            title="Платформа"
+            title="Платформа",
+            storage_secret="secret-key-2025"
         )
     except Exception as e:
         print(f"❌ CRITICAL ERROR: {e}")

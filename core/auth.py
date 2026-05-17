@@ -1,22 +1,25 @@
 from nicegui import app
 
 class Auth:
-    def __init__(self):
-        self.current_user = None
-        self.current_role = None
-
     def login(self, user_data: dict):
-        self.current_user = user_data["username"]
-        self.current_role = user_data["role"]
+        """Логиним текущего клиента (браузер)"""
+        client = app.storage.client
+        client['authenticated'] = True
+        client['username'] = user_data["username"]
+        client['role'] = user_data.get("role", "viewer")
 
     def logout(self):
-        self.current_user = None
-        self.current_role = None
+        app.storage.client.clear()
 
     def is_authenticated(self) -> bool:
-        return self.current_user is not None
+        return app.storage.client.get('authenticated', False)
+
+    def current_user(self) -> str:
+        return app.storage.client.get('username', None)
+
+    def current_role(self) -> str:
+        return app.storage.client.get('role', 'viewer')
 
     def has_role(self, allowed_roles: list) -> bool:
-        if not self.current_role:
-            return False
-        return self.current_role in allowed_roles
+        role = self.current_role()
+        return role in allowed_roles if role else False

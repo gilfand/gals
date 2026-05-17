@@ -105,7 +105,7 @@ class IndustrialApp:
         with ui.header().classes("items-center justify-between px-4 py-2 bg-[#1E2A24]"):
             ui.label("Промышленная Платформа").classes("text-h6 font-bold")
             with ui.row():
-                ui.label(f"{self.auth.current_user} ({self.auth.current_role})").classes("text-sm")
+                ui.label(f"{self.auth.current_user()} ({self.auth.current_role()})").classes("text-sm")
                 ui.button(icon="logout", on_click=self.logout).props("flat")
 
         with ui.left_drawer(value=True, fixed=False).classes("bg-[#0F1A14] text-white"):
@@ -135,7 +135,7 @@ class IndustrialApp:
             with self.main_content:
                 plugin.build()
 
-    def logout(self):
+def logout(self):
         self.auth.logout()
         ui.navigate.to('/login')
 

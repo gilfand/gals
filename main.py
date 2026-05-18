@@ -104,12 +104,13 @@ class IndustrialApp:
 
     def show_main_app(self):
         with ui.header().classes("items-center justify-between px-4 py-2 bg-[#1E2A24]"):
+            ui.button(icon="menu", on_click=lambda: self.left_drawer.toggle()).props("flat color=white")
             ui.label("Промышленная Платформа").classes("text-h6 font-bold")
             with ui.row():
                 ui.label(f"{self.auth.current_user()} ({self.auth.current_role()})").classes("text-sm")
                 ui.button(icon="logout", on_click=self.logout).props("flat")
 
-        with ui.left_drawer(value=True, fixed=False).classes("bg-[#0F1A14] text-white"):
+        with ui.left_drawer(value=False, fixed=False, bordered=True).classes("bg-[#0F1A14] text-white") as self.left_drawer:
             self.build_sidebar()
 
         self.main_content = ui.column().classes("w-full p-6 gap-6")

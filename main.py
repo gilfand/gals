@@ -6,9 +6,10 @@ import sys
 from nicegui import ui
 
 from core.config import AppConfig
-from core.database import Database
 from core.auth import Auth
+
 from core.plugin import Plugin
+from core.container import container
 
 from plugins.dashboard.dashboard import DashboardPlugin
 from plugins.settings.settings import SettingsPlugin
@@ -22,7 +23,7 @@ class IndustrialApp:
             raise ValueError("DATABASE_URL не найден!")
 
         print(db_url)
-        self.db = Database(db_url)
+        self.db = container.database
         print("✅ База данных подключена")
 
         self.auth = Auth()
